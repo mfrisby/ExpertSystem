@@ -12,53 +12,75 @@ from utils.printColor import *
 # => implies
 # <=> if only if
 
+Rules = {}#false while not solved
 Query = ""
-Rules = []
-Facts = []#true values are saved here (make append a letter if true)
+Facts = {}
 
-def parseRule(rule):
+#Parse File	
+def removeComment(line):
+		index = 0
+		if '#' in line:
+			index = line.index("#")
+			return line[:index]
+		return line
+	
+def parseFile(f):
+	for line in f:
+		#comment
+		if line.startswith('#'):
+			continue
+		#query
+		elif line.startswith('?'):
+			Query = removeComment(line)
+		#initials fact	
+		elif line.startswith('='):
+			facts = removeComment(line)
+			for letter in facts:
+					if letter.isalpha():
+						Facts.update({letter:True})
+		#rules				
+		else:
+			s = removeComment(line)
+			Rules.update({s:False})
+	print "Rules"
+	printBlue(Rules)
+	print "Query"
+	printYellow(Query)
+	print "Facts"
+	printRed(Facts)
+
+#Parse Rules
+def splitRule(rule):
+	rule = rule.replace(" ", "")
 	splitted = re.split("(<=>)|(=>)", rule)
 	while None in splitted:
 		splitted.remove(None)
-	print splitted
+	if len(splitted) != 3:
+		return None
+	return splitted
 
-def isItTrue(rule, fact):
-	rule = rule.replace(" ", "")
-	print rule
-	parseRule(rule)
-	#if rule.isalpha() and len(rule) == 1:	
+#left = splitted[0]
+#right = splitted[2]
+#middle = splitted[1]
+def implies(splitted):
+	print "implies" + str(splitted)
 
+def check(splitted):
+	print "check" + str(splitted)
+
+def solveRule(splitted):
+	if splitted[1] == "=>":
+		implies(splitted)
+	elif splitted[1] == "<=>":
+		check(splitted)
+	
 def solveWithInitialsFacts():
 	newFacts = []
 	for rule in Rules:
 		for fact in Facts:
 			if fact in rule:
-				isItTrue(rule, fact)
-
-def removeComment(line):
-	index = 0
-	if '#' in line:
-		index = line.index("#")
-		return line[:index]
-	return line
-
-def parseFile(f):
-	for line in f:
-		if line.startswith('#'):
-			continue
-		elif line.startswith('?'):
-			Query = removeComment(line)
-		elif line.startswith('='):
-			facts = removeComment(line)
-			for letter in facts:
-				if letter.isalpha():
-					Facts.append(letter)
-		else:
-			s = removeComment(line)
-			Rules.append(s)
-	printBlue(Rules)
-	printYellow(Query)
-	printRed(Facts)
+				splitted = splitRule(rule)
+				solveRule(splitted)
 
 def main():
 	if len(sys.argv) != 2:
