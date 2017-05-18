@@ -63,6 +63,17 @@ def splitRule(rule):
 #right = splitted[2]
 #middle = splitted[1]
 def implies(splitted):
+	if len(splitted[2]) > 1:
+		s = re.split(".", splitted[2])
+		while None in s:
+			s.remove(None)
+	else:
+		s = splitted[2]
+	print s
+	for i in s:
+		print i
+		Facts.update({i : False})
+	print Facts
 	print "implies" + str(splitted)
 
 def check(splitted):
@@ -75,9 +86,10 @@ def solveRule(splitted):
 		check(splitted)
 	
 def solveWithInitialsFacts():
-	newFacts = []
-	for rule in Rules:
-		for fact in Facts:
+	copyFacts = Facts
+	copyRules = Rules
+	for rule in copyRules:
+		for fact in copyFacts:
 			if fact in rule:
 				splitted = splitRule(rule)
 				solveRule(splitted)
