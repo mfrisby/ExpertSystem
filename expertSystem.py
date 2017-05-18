@@ -12,9 +12,31 @@ from utils.printColor import *
 # => implies
 # <=> if only if
 
-Rules = {}#false while not solved
+Rules = []#get 1 class for each rule
 Query = ""
-Facts = {}
+Facts = {}#get fact with true/false value
+
+class Rule:
+	alreadySolve = False
+	def __init__(self, r):
+		self.rule = r.replace(" ", "")
+		splitted = re.split("(<=>)|(=>)", self.rule)
+		while None in splitted:
+			splitted.remove(None)
+		if len(splitted) == 3:
+			self.middle = splitted[1]
+			self.right = list(splitted[2])
+			self.left = list(splitted[0])
+		printBlue("Rule : " + str(self.rule))
+	
+	def _get_left(self):
+		return self.left
+	def _get_right(self):
+		return self.right
+	def _get_rule_string(self):
+		return self.rule
+	def _get_middle(self):
+		return self.middle
 
 #Parse File	
 def removeComment(line):
@@ -36,63 +58,46 @@ def parseFile(f):
 		elif line.startswith('='):
 			facts = removeComment(line)
 			for letter in facts:
-					if letter.isalpha():
-						Facts.update({letter:True})
-		#rules				
+				if letter.isalpha():
+					Facts.update({letter:True})
+		#rules
 		else:
-			s = removeComment(line)
-			Rules.update({s:False})
-	print "Rules"
-	printBlue(Rules)
-	print "Query"
+			Rules.append(Rule(removeComment(line)))#remove comment + create class + append to list of rules
+	print ("Query")
 	printYellow(Query)
-	print "Facts"
+	print ("Facts")
 	printRed(Facts)
 
 #Parse Rules
-def splitRule(rule):
-	rule = rule.replace(" ", "")
-	splitted = re.split("(<=>)|(=>)", rule)
-	while None in splitted:
-		splitted.remove(None)
-	if len(splitted) != 3:
-		return None
-	return splitted
+def check(rule, fact):
+	print("check : " + str(rule.rule) + " : " + str(fact))
 
-#left = splitted[0]
-#right = splitted[2]
-#middle = splitted[1]
-def implies(splitted):
-	if len(splitted[2]) > 1:
-		s = re.split(".", splitted[2])
-		while None in s:
-			s.remove(None)
-	else:
-		s = splitted[2]
-	print s
-	for i in s:
-		print i
-		Facts.update({i : False})
-	print Facts
-	print "implies" + str(splitted)
+def implies(rule, fact):
+	print("implies" + str(rule.rule) + " : " + str(fact))
 
-def check(splitted):
-	print "check" + str(splitted)
+def solveRule():
+	for rule in Rules:
+		if rule.alreadySolve == True:
+			print("Already Solve")
+			continue
+		for fact in Facts:
+			if fact not in rule.left and fact not in rule.right:
+				print("Not in Facts")
+				continue
+			if rule._get_middle() == "=>":
+				implies(rule, fact)
+			elif rule._get_middle() == "<=>":
+				check(rule, fact)
 
-def solveRule(splitted):
-	if splitted[1] == "=>":
-		implies(splitted)
-	elif splitted[1] == "<=>":
-		check(splitted)
-	
-def solveWithInitialsFacts():
-	copyFacts = Facts
-	copyRules = Rules
-	for rule in copyRules:
-		for fact in copyFacts:
-			if fact in rule:
-				splitted = splitRule(rule)
-				solveRule(splitted)
+#def solveWithInitialsFacts():
+	#copyFacts = Facts.copy()
+	#for rule in Rules:
+		#for fact in Facts:
+			#if fact in rule:
+				#splitted = splitRule(rule)
+				#solveRule(splitted, copyFacts)
+	#print("copyFacts = " + str(copyFacts))
+	#Facts = copyFacts.copy()
 
 def main():
 	if len(sys.argv) != 2:
@@ -101,7 +106,7 @@ def main():
 	s = str(sys.argv[1])
 	f = open(s, 'r')
 	parseFile(f)
-	solveWithInitialsFacts()
+	solveRule()
 	f.close()
 	return
 main()
