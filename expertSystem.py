@@ -7,8 +7,6 @@ from utils.printColor import *
 Rules = []
 Query = ""
 Facts = {}
-StrLeft = ""
-StrRight = ""
 
 class Rule:
 	alreadySolve = False
@@ -58,92 +56,89 @@ def parseFile(f):
 	printYellow("Query : " + str(Query))
 	printRed("Facts : " + str(Facts))
 
-def implies1(rule, fact):
-	global StrLeft
-	global StrRight
-	canSolve = 0#is False had to return False because rule not solved
-	StrLeft = rule.left[:]
-	StrRight = rule.right[:]
-	result = 0#to add in Fact
-	canSolve = solve(None)
-	if canSolve == -1:
-		return False
-	elif canSolve == 0:
-		solveRight(False)
-	elif canSolve == 1:
-		solveRight(True)
-	return True#IS SOLVED RETURN TRUE
-
-def solveRight1(result):
-	myFact = ''
-	if len(StrRight) == 1:
-		Facts.update({StrRight:result})
-	elif len(StrRight) == 2 and "!" in StrRight:
-		Facts.update({(StrRight.replace("!","")):result})
-	else:
-		print("TODO")
-
-def solveParenthese(s):
-	global StrLeft
-	if s == None:
-		s = StrLeft
-	while "(" in s and ")" in s:
-		parentheseStart = s.index("(")
-		parentheseEnd = s.index(")")
-		strParenthese = s[parentheseStart:parentheseEnd+1]
-		StrLeft = s.replace(strParenthese, "")
-		strParenthese = strParenthese.replace(")","")
-		strParenthese = strParenthese.replace("(","")
-		print(strParenthese)
-		solve(strParenthese)
-		print("strleft" + str(StrLeft))
-		break
-	return 0
-
-def solveAnd(rule):
-	s = rule.left
-	aV = True
-	bV = True
-	if s == None:
-		print StrLeft
-		s = StrLeft
-	while "+" in s:
-		split = s.split("+")
-		if len(split) > 1:
-			a = split[0]
-			b = split[1]
-			if "!" in a:
-				aV = False
-				a = a.replace("!","")
-			if "!" in b:
-				bV = False
-				b = b.replace("!", "")
-			if str(a) in Facts.keys() and str(b) in Facts.keys():
-				if Facts[a] == aV and Facts[b] == bV:
-					return 1
-				else:
-					return 0
-			else:
-				return -1
-	return -1
-
 def solveOr(s):
 	return 0
 def solveXor(s):
 	return 0
-def solveLeft(s):
-	result = 0
-	if "(" in StrLeft:
-		result = solveParenthese(s)
-		s = None
-	if "+" in StrLeft:
-		result = solveAnd(s)
-		s = None
+def solveParenthese(s):
+	#while "(" in s and ")" in s:
+	#	parentheseStart = s.index("(")
+	#	parentheseEnd = s.index(")")
+	#	strParenthese = s[parentheseStart:parentheseEnd+1]
+	#	StrLeft = s.replace(strParenthese, "")
+	#	strParenthese = strParenthese.replace(")","")
+	#	strParenthese = strParenthese.replace("(","")
+	#	print(strParenthese)
+	#	solve(strParenthese)
+	#	print("strleft" + str(StrLeft))
+	#	break
+	return "0"
+
+def solveAnd(a, b):
+	aV = True
+	bV = True
+	#print a
+	if "!" in a:
+		aV = False
+		a = a.replace("!","")
+	if "!" in b:
+		bV = False
+		b = b.replace("!", "")
+	if a.isdigit():
+		if a == "1" and b in Facts.keys() and Facts[b] == True:
+			return "1"
+		elif a == "0" or b not in Facts.keys or Facts[b] == False:
+			return "0"
+	if str(a) in Facts.keys() and str(b) in Facts.keys():
+		if Facts[a] == aV and Facts[b] == bV:
+			return "1"
+		else:
+			return "0"
+	return "-1"
+def solveLeft(l):
+	print("l : " + str(l))
+	listResult = l[:]
+	ret = -1
+	for n, item in enumerate(l):
+		if "(" in item:
+			s = item.replace(")", "")
+			s = s.replace("(", "")
+			s = parseRightOrLeft(s)
+			print("s :  "+ str(s))
+			ret = solveParenthese(s)
+			print ret
+		elif "+" == item:
+			#print l[n-1]
+			#print(" ln 1 : " + str(l[n-1])+ str(l[n+1]))
+			ret = solveAnd(listResult[n-1], listResult[n+1])
+		#elif "|" == item:
+			#print(" ln 1 : " + str(l[n-1])+ str(l[n+1]))
+			#ret = solveOr(listResult[n-1], listResult[n+1])
+		#elif "^" == item:
+			#print(" ln 1 : " + str(l[n-1])+ str(l[n+1]))
+			#ret = solveXor(listResult[n-1], listResult[n+1])
+		if ret == "-1":
+			return -1
+		listResult[n] = ret
+	return 1
 	#if "|" in StrLeft:
 		#result = solveOr(s)
 	#if "^" in StrLeft:
 		#result = solveXor(s)
-	return result
+	return -1
+
+def implies(rule):
+	listFactsRight = []
+	resultLeft = -1
+
+	listRulesLeft = parseRightOrLeft(rule.left)
+	listFactsRight = parseRightOrLeft(rule.right)
+	#print("leftStart : " + rule.left + " list : " + str(listRulesLeft))
+	#print("rightStart : " + rule.right + " list : " + str(listFactsRight))
+	resultLeft = solveLeft(listRulesLeft)
+	if resultLeft == -1:
+		return False
+	return True
 
 def parseRightOrLeft(s):
 	parentheses = []
@@ -162,20 +157,6 @@ def parseRightOrLeft(s):
 		else:
 			letters.append(letter)
 	return parentheses + letters
-
-def implies(rule):
-	listFactsRight = []
-	resultLeft = -1
-
-	listRulesLeft = parseRightOrLeft(rule.left)
-	listFactsRight = parseRightOrLeft(rule.right)
-	print("leftStart : " + rule.left + " list : " + str(listRulesLeft))
-	print("rightStart : " + rule.right + " list : " + str(listFactsRight))
-	resultLeft = solveLeft(listRulesLeft)
-	if resultLeft == -1:
-		return False
-	
-	return True
 
 #seems OK
 def solveRule():
