@@ -58,6 +58,31 @@ def parseFile(f):
 	printYellow("Query : " + str(Query))
 	printRed("Facts : " + str(Facts))
 
+def implies1(rule, fact):
+	global StrLeft
+	global StrRight
+	canSolve = 0#is False had to return False because rule not solved
+	StrLeft = rule.left[:]
+	StrRight = rule.right[:]
+	result = 0#to add in Fact
+	canSolve = solve(None)
+	if canSolve == -1:
+		return False
+	elif canSolve == 0:
+		solveRight(False)
+	elif canSolve == 1:
+		solveRight(True)
+	return True#IS SOLVED RETURN TRUE
+
+def solveRight1(result):
+	myFact = ''
+	if len(StrRight) == 1:
+		Facts.update({StrRight:result})
+	elif len(StrRight) == 2 and "!" in StrRight:
+		Facts.update({(StrRight.replace("!","")):result})
+	else:
+		print("TODO")
+
 def solveParenthese(s):
 	global StrLeft
 	if s == None:
@@ -75,8 +100,8 @@ def solveParenthese(s):
 		break
 	return 0
 
-def solveAnd(s):
-	print s
+def solveAnd(rule):
+	s = rule.left
 	aV = True
 	bV = True
 	if s == None:
@@ -104,19 +129,9 @@ def solveAnd(s):
 
 def solveOr(s):
 	return 0
-
 def solveXor(s):
 	return 0
-
-def solveRight(result):
-	myFact = ''
-	if len(StrRight) == 1:
-		Facts.update({StrRight:result})
-	elif len(StrRight) == 2 and "!" in StrRight:
-		Facts.update({(StrRight.replace("!","")):result})
-	else:
-		print("TODO")
-def solve(s):
+def solveLeft(s):
 	result = 0
 	if "(" in StrLeft:
 		result = solveParenthese(s)
@@ -130,25 +145,39 @@ def solve(s):
 		#result = solveXor(s)
 	return result
 
-def implies(rule, fact):
-	global StrLeft
-	global StrRight
-	canSolve = 0#is False had to return False because rule not solved
-	StrLeft = rule.left[:]
-	StrRight = rule.right[:]
-	result = 0#to add in Fact
-	canSolve = solve(None)
-	if canSolve == -1:
-		return False
-	elif canSolve == 0:
-		solveRight(False)
-	elif canSolve == 1:
-		solveRight(True)
-	return True#IS SOLVED RETURN TRUE
+def parseRightOrLeft(s):
+	parentheses = []
+	letters = []
+	while "(" in s and ")" in s:
+		start = s.index("(")
+		end = s.index(")") + 1
+		parenthese = s[start:end]
+		parentheses.append(parenthese)
+		s = s.replace(parenthese, "")
+	for i, letter in enumerate(s):
+		if i != 0 and s[i -1] == "!":
+			continue
+		if letter == "!" and i != len(s):
+			letters.append(s[i] + s[i + 1])
+		else:
+			letters.append(letter)
+	return parentheses + letters
 
-def ifAndOnlyIf(rule, fact):
+def implies(rule):
+	listFactsRight = []
+	resultLeft = -1
+
+	listRulesLeft = parseRightOrLeft(rule.left)
+	listFactsRight = parseRightOrLeft(rule.right)
+	print("leftStart : " + rule.left + " list : " + str(listRulesLeft))
+	print("rightStart : " + rule.right + " list : " + str(listFactsRight))
+	resultLeft = solveLeft(listRulesLeft)
+	if resultLeft == -1:
+		return False
+	
 	return True
 
+#seems OK
 def solveRule():
 	while True:
 		listPointeur = []
@@ -158,13 +187,13 @@ def solveRule():
 				continue
 			for fact in Facts:
 				if fact not in rule.left and fact not in rule.right:
-					continue#can make infinite loop ! (if no rule can be solved)
+					continue
 				if rule._get_middle() == "=>":
-					rule.alreadySolve = implies(rule, fact)
-					print rule.alreadySolve
+					rule.alreadySolve = implies(rule)
 					break
 				elif rule._get_middle() == "<=>":
-					rule.alreadySolve = ifAndOnlyIf(rule, fact)
+					rule.alreadySolve = True
+					#rule.alreadySolve = ifAndOnlyIf(rule)
 					break
 		if False not in listPointeur:
 			break
