@@ -190,12 +190,17 @@ def solveRule():
 
 def main():
 	if len(sys.argv) != 2:
-		print "no correct input"
+		print "Error: input expected."
 		return
 	s = str(sys.argv[1])
-	f = open(s, 'r')
+	try:
+		f = open(s, 'r')
+	except IOError as e:
+		print "I/O error({0}): {1}".format(e.errno, e.strerror)
+		exit()
 	parseFile(f)
 	solveRule()
 	f.close()
 	return
+
 main()
