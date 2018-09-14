@@ -9,19 +9,19 @@ Cyan = "\033[36m"
 EndColor = "\033[0m"
 
 def printGreen(myString):
-	print Green + str(myString) + EndColor
-	
+	print(Green + str(myString) + EndColor, end='\n', flush=True)
+
 def printRed(myString):
-	print Red + str(myString) + EndColor
+	print(Red + str(myString) + EndColor, end='\n', flush=True)
 	
 def printBlue(myString):
-	print Blue + str(myString) + EndColor
+	print(Blue + str(myString) + EndColor, end='\n', flush=True)
 	
 def printYellow(myString):
-	print Yellow + str(myString) + EndColor
+	print(Yellow + str(myString) + EndColor, end='\n', flush=True)
 
 def printPurple(myString):
-	print Purple + str(myString) + EndColor
+	print(Purple + str(myString) + EndColor, end='\n', flush=True)
 
 def printCyan(myString):
-	print Cyan + str(myString) + EndColor
+	print(Cyan + str(myString) + EndColor, end='\n', flush=True)
