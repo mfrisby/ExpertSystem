@@ -21,7 +21,9 @@ class Rule:
 			self.middle = splitted[1]
 			self.right = splitted[2]
 			self.left = splitted[0]
-		printBlue("Rule : " + str(self.rule))
+			printBlue("Rule : " + str(self.rule))
+		else:
+			printRed("Syntax error: " + str(self.rule))
 	
 	def _get_left(self):
 		return self.left
@@ -50,7 +52,7 @@ def parseFile(f):
 			facts = removeComment(line)
 			for letter in facts:
 				if letter.isalpha():
-					Facts.update({letter:True})
+					Facts.update({letter:1})
 		else:
 			Rules.append(Rule(removeComment(line)))
 	printYellow("Query : " + str(Query))
@@ -68,13 +70,13 @@ def parseFile(f):
 
 def main():
 	if len(sys.argv) != 2:
-		print "Error: input expected."
+		print("Error: input expected.")
 		return
 	s = str(sys.argv[1])
 	try:
 		f = open(s, 'r')
 	except IOError as e:
-		print "I/O error({0}): {1}".format(e.errno, e.strerror)
+		print("I/O error({0}): {1}".format(e.errno, e.strerror))
 		exit()
 	parseFile(f)
 	f.close()
