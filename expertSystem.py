@@ -2,37 +2,11 @@
 
 import sys
 import re
-from utils.printColor import *
+from termcolor import colored, cprint
 
 Rules = []
 Query = ""
 Facts = {}
-
-class Rule:
-	alreadySolve = False
-	leftResult = False
-	rightResult = False
-	def __init__(self, r):
-		self.rule = r.replace(" ", "")
-		splitted = re.split("(<=>)|(=>)", self.rule)
-		while None in splitted:
-			splitted.remove(None)
-		if len(splitted) == 3:
-			self.middle = splitted[1]
-			self.right = splitted[2]
-			self.left = splitted[0]
-			printBlue("Rule : " + str(self.rule))
-		else:
-			printRed("Syntax error: " + str(self.rule))
-	
-	def _get_left(self):
-		return self.left
-	def _get_right(self):
-		return self.right
-	def _get_rule_string(self):
-		return self.rule
-	def _get_middle(self):
-		return self.middle
 
 #Parse File	
 def removeComment(line):
@@ -53,10 +27,9 @@ def parseFile(f):
 			for letter in facts:
 				if letter.isalpha():
 					Facts.update({letter:1})
-		else:
-			Rules.append(Rule(removeComment(line)))
-	printYellow("Query : " + str(Query))
-	printRed("Facts : " + str(Facts))
+		elif line:
+			Rules.append(removeComment(line))
+	print(colored(str(Query), 'yellow'), '\n', colored(str(Facts), 'red'), '\n', colored(str(Rules), 'green'))
 
 	
 #priority
