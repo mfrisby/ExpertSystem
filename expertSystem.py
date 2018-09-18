@@ -17,9 +17,11 @@ def removeComment(line):
 	return line
 	
 def parseFile(f):
+	#needed to update a global
 	global Rules
 	global Query
 	global Facts
+
 	for line in f:
 		if line.startswith('#'):
 			continue
@@ -33,6 +35,21 @@ def parseFile(f):
 		elif line:
 			Rules.append(removeComment(line))
 	print(colored(str(Query), 'yellow'), '\n', colored(str(Facts), 'red'), '\n', colored(str(Rules), 'green'))
+
+def solve_xor(a, b):
+	if a == b:
+		return 0
+	return 1
+
+def solve_or(a, b):
+	if a == 1 or b == 1:
+		return 1
+	return 0
+
+def solve_and(a, b):
+	if a == 1 and b == 1:
+		return 1
+	return 0
 
 #priority
 # ( ) 1	
@@ -55,6 +72,9 @@ def main():
 		exit()
 	parseFile(f)
 	f.close()
+	print(solve_xor(Facts['A'], Facts['B']))
+	print(solve_or(Facts['A'], Facts['B']))
+	print(solve_and(Facts['A'], Facts['B']))
 	return
 
 main()
