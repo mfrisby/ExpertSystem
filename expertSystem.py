@@ -2,7 +2,7 @@
 
 import sys
 import re
-from termcolor import colored, cprint
+from printcolor import *
 
 Rules = []
 Query = ""
@@ -34,7 +34,9 @@ def parseFile(f):
 					Facts.update({letter:1})
 		elif line:
 			Rules.append(removeComment(line))
-	print(colored(str(Query), 'yellow'), '\n', colored(str(Facts), 'red'), '\n', colored(str(Rules), 'green'))
+	printYellow(str(Query))
+	printGreen(str(Facts))
+	printBlue(str(Rules))
 
 def solve_xor(a, b):
 	if a == b:
